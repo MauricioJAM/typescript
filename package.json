@@ -1,0 +1,20 @@
+{
+  "name": "node-exercise",
+  "version": "1.0.0",
+  "description": "Este es un ejercicio de Node.js",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Mauricio Magaña,mjam291000@gmail.com",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
