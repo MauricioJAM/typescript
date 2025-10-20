@@ -1,36 +1,66 @@
-function calculateAge(Birthday: string): number | null {
-  // Convertir el formato DD/MM/YYYY a un objeto Date
-  const dateParts = Birthday.split("/");
-  if (dateParts.length !== 3 || !dateParts[0] || !dateParts[1] || !dateParts[2]) {
-    console.warn("Formato de fecha inválido. Use DD/MM/YYYY.");
-    return null;
+function isValidDateFormat(dateStr: string): boolean {
+  // Formato en YYYY-MM-DD
+  const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
+  return isoRegex.test(dateStr);
+}
+
+function isRealDate(year: number, month: number, day: number): boolean {
+  
+  if (month < 1 || month > 12) return false;
+  if (day < 1) return false;
+
+  // Obtener último día del mes
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return day <= daysInMonth;
+}
+
+function calculateAge(birthIso: string): number | string {
+  if (!isValidDateFormat(birthIso)) {
+    return `Formato de fecha inválido. Use YYYY-MM-DD.`;
   }
 
-  const day = parseInt(dateParts[0], 10);
-  const month = parseInt(dateParts[1], 10) - 1; // Los meses en JavaScript son base 0
-  const year = parseInt(dateParts[2], 10);
+  const parts = birthIso.split("-");
+  const yStr = parts[0];
+  const mStr = parts[1];
+  const dStr = parts[2];
 
-  const birth = new Date(year, month, day);
+  if (!yStr || !mStr || !dStr) {
+    return `Fecha no contiene todos sus elementos.`;
+  }
+
+  const year = parseInt(yStr, 10);
+  const month = parseInt(mStr, 10);
+  const day = parseInt(dStr, 10);
+
+  if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+    return `La fecha tiene valores no numéricos.`;
+  }
+
+  if (!isRealDate(year, month, day)) {
+    return `Fecha inválida (día/mes fuera de rango o no existe).`;
+  }
+
+  const birth = new Date(year, month - 1, day);
   const today = new Date();
 
-  if (isNaN(birth.getTime()) || birth > today) {
-    console.warn("Fecha inválida o en el futuro.");
-    return null;
+  if (birth > today) {
+    return `Fecha en el futuro.`;
   }
 
   let edad = today.getFullYear() - birth.getFullYear();
-  const mesActual = today.getMonth();
+  const mesActual = today.getMonth() + 1; 
   const diaActual = today.getDate();
-  const mesNacimiento = birth.getMonth();
-  const diaNacimiento = birth.getDate();
 
-  if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
-    edad--;
+  if (mesActual < month || (mesActual === month && diaActual < day)) {
+    edad--; 
   }
 
   return edad;
 }
 
-// Pruebas
-console.log(calculateAge("29/02/2025")); 
-console.log(calculateAge("01/01/2026"));
+// Ejemplos 
+console.log('(2000-02-29) =>', calculateAge('2000-02-29'));
+console.log('(29-02-2000) =>', calculateAge('29-02-2000'));
+console.log('(2021-02-29) =>', calculateAge('2021-02-29'));
+console.log('(3000-01-01) =>', calculateAge('3000-01-01'));
+console.log('(2025-05-01) =>', calculateAge('2025-05-01'));

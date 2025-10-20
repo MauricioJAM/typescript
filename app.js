@@ -1,29 +1,56 @@
-function calculateAge(Birthday) {
-    // Convertir el formato DD/MM/YYYY a un objeto Date
-    var dateParts = Birthday.split("/");
-    if (dateParts.length !== 3 || !dateParts[0] || !dateParts[1] || !dateParts[2]) {
-        console.warn("Formato de fecha inválido. Use DD/MM/YYYY.");
-        return null;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function isValidDateFormat(dateStr) {
+    // Formato en YYYY-MM-DD
+    const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
+    return isoRegex.test(dateStr);
+}
+function isRealDate(year, month, day) {
+    if (month < 1 || month > 12)
+        return false;
+    if (day < 1)
+        return false;
+    // Obtener último día del mes
+    const daysInMonth = new Date(year, month, 0).getDate();
+    return day <= daysInMonth;
+}
+function calculateAge(birthIso) {
+    if (!isValidDateFormat(birthIso)) {
+        return `Formato de fecha inválido. Use YYYY-MM-DD.`;
     }
-    var day = parseInt(dateParts[0], 10);
-    var month = parseInt(dateParts[1], 10) - 1; // Los meses en JavaScript son base 0
-    var year = parseInt(dateParts[2], 10);
-    var birth = new Date(year, month, day);
-    var today = new Date();
-    if (isNaN(birth.getTime()) || birth > today) {
-        console.warn("Fecha inválida o en el futuro.");
-        return null;
+    const parts = birthIso.split("-");
+    const yStr = parts[0];
+    const mStr = parts[1];
+    const dStr = parts[2];
+    if (!yStr || !mStr || !dStr) {
+        return `Fecha no contiene todos sus elementos.`;
     }
-    var edad = today.getFullYear() - birth.getFullYear();
-    var mesActual = today.getMonth();
-    var diaActual = today.getDate();
-    var mesNacimiento = birth.getMonth();
-    var diaNacimiento = birth.getDate();
-    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
+    const year = parseInt(yStr, 10);
+    const month = parseInt(mStr, 10);
+    const day = parseInt(dStr, 10);
+    if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+        return `La fecha tiene valores no numéricos.`;
+    }
+    if (!isRealDate(year, month, day)) {
+        return `Fecha inválida (día/mes fuera de rango o no existe).`;
+    }
+    const birth = new Date(year, month - 1, day);
+    const today = new Date();
+    if (birth > today) {
+        return `Fecha en el futuro.`;
+    }
+    let edad = today.getFullYear() - birth.getFullYear();
+    const mesActual = today.getMonth() + 1;
+    const diaActual = today.getDate();
+    if (mesActual < month || (mesActual === month && diaActual < day)) {
         edad--;
     }
     return edad;
 }
-// Pruebas
-console.log(calculateAge("29/02/2025"));
-console.log(calculateAge("01/01/2026"));
+// Ejemplos 
+console.log('(2000-02-29) =>', calculateAge('2000-02-29'));
+console.log('(29-02-2000) =>', calculateAge('29-02-2000'));
+console.log('(2021-02-29) =>', calculateAge('2021-02-29'));
+console.log('(3000-01-01) =>', calculateAge('3000-01-01'));
+console.log('(2025-05-01) =>', calculateAge('2025-05-01'));
+//# sourceMappingURL=app.js.map
